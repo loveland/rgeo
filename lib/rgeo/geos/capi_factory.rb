@@ -288,17 +288,23 @@ module RGeo
         end
       end
 
-      # See RGeo::Feature::Factory#parse_wkb
-
-      def parse_wkb(str_)
-        if (wkb_parser_ = _wkb_parser)
-          wkb_parser_.parse(str_)
+      # See ::RGeo::Feature::Factory#parse_wkb
+      def parse_wkb(wkb_string)
+        if hex_string?(wkb_string)
+          _parse_hex_wkb_impl(wkb_string)
         else
-          _parse_wkb_impl(str_)
+          _parse_wkb_impl(wkb_string)
         end
       end
 
       # See RGeo::Feature::Factory#point
+      def hex_string?(wkb_string)
+        !!wkb_string.match(/\A\h/)
+      end
+      private :hex_string?
+
+
+      # See ::RGeo::Feature::Factory#point
 
       def point(x_, y_, *extra_)
         if extra_.length > (_flags & 6 == 0 ? 0 : 1)

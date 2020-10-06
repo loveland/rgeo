@@ -220,6 +220,32 @@ static VALUE method_factory_parse_wkb(VALUE self, VALUE str)
   return result;
 }
 
+static VALUE method_factory_parse_hex_wkb(VALUE self, VALUE str)
+{
+  RGeo_FactoryData* self_data;
+  GEOSContextHandle_t self_context;
+  GEOSWKBReader* wkb_reader;
+  VALUE result;
+  GEOSGeometry* geom;
+
+  Check_Type(str, T_STRING);
+  self_data = RGEO_FACTORY_DATA_PTR(self);
+  self_context = self_data->geos_context;
+  wkb_reader = self_data->wkb_reader;
+  if (!wkb_reader) {
+    wkb_reader = GEOSWKBReader_create_r(self_context);
+    self_data->wkb_reader = wkb_reader;
+  }
+  result = Qnil;
+  if (wkb_reader) {
+    geom = GEOSWKBReader_readHEX_r(self_context, wkb_reader, (unsigned char*)RSTRING_PTR(str), (size_t)RSTRING_LEN(str));
+    if (geom) {
+      result = rgeo_wrap_geos_geometry(self, geom, Qnil);
+    }
+  }
+  return result;
+}
+
 
 static VALUE method_factory_read_for_marshal(VALUE self, VALUE str)
 {
@@ -613,6 +639,7 @@ RGeo_Globals* rgeo_init_geos_factory()
   rb_define_method(geos_factory_class, "initialize_copy", method_factory_initialize_copy, 1);
   rb_define_method(geos_factory_class, "_parse_wkt_impl", method_factory_parse_wkt, 1);
   rb_define_method(geos_factory_class, "_parse_wkb_impl", method_factory_parse_wkb, 1);
+  rb_define_method(geos_factory_class, "_parse_hex_wkb_impl", method_factory_parse_hex_wkb, 1);
   rb_define_method(geos_factory_class, "_srid", method_factory_srid, 0);
   rb_define_method(geos_factory_class, "_buffer_resolution", method_factory_buffer_resolution, 0);
   rb_define_method(geos_factory_class, "_flags", method_factory_flags, 0);
