@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Cartesian geometric analysis utilities
@@ -11,6 +13,28 @@ module RGeo
 
     module Analysis
       class << self
+        # Check orientation of a ring, returns `true` if it is counter-clockwise
+        # and false otherwise.
+        #
+        # If the factory used is GEOS based, use the GEOS implementation to
+        # check that. Otherwise, this methods falls back to `ring_direction`.
+        #
+        # == Note
+        #
+        # This method does not ensure a correct result for an invalid geometry.
+        # You should make sure your ring is valid beforehand using `is_ring?`
+        # if you are using a LineString, or directly `valid?` for a
+        # `linear_ring?`.
+        # This will be subject to changes in v3.
+        def ccw?(ring)
+          if RGeo::Geos.is_capi_geos?(ring) && RGeo::Geos::Analysis.ccw_supported?
+            RGeo::Geos::Analysis.ccw?(ring)
+          else
+            RGeo::Cartesian::Analysis.ring_direction(ring) == 1
+          end
+        end
+        alias counter_clockwise? ccw?
+
         # Given a LineString, which must be a ring, determine whether the
         # ring proceeds clockwise or counterclockwise.
         # Returns 1 for counterclockwise, or -1 for clockwise.
@@ -19,33 +43,33 @@ module RGeo
         # The return value is undefined if the object is not a ring, or
         # is not in a Cartesian coordinate system.
 
-        def ring_direction(ring_)
-          size_ = ring_.num_points - 1
-          return 0 if size_ == 0
+        def ring_direction(ring)
+          size = ring.num_points - 1
+          return 0 if size == 0
 
           # Extract unit-length segments from the ring.
-          segs_ = []
-          size_.times do |i_|
-            p0_ = ring_.point_n(i_)
-            p1_ = ring_.point_n(i_ + 1)
-            x_ = p1_.x - p0_.x
-            y_ = p1_.y - p0_.y
-            r_ = ::Math.sqrt(x_ * x_ + y_ * y_)
-            if r_ > 0.0
-              segs_ << x_ / r_ << y_ / r_
+          segs = []
+          size.times do |i|
+            p0 = ring.point_n(i)
+            p1 = ring.point_n(i + 1)
+            x = p1.x - p0.x
+            y = p1.y - p0.y
+            r = Math.sqrt(x * x + y * y)
+            if r > 0.0
+              segs << x / r << y / r
             else
-              size_ -= 1
+              size -= 1
             end
           end
-          segs_ << segs_[0] << segs_[1]
+          segs << segs[0] << segs[1]
 
           # Extract angles from the segments by subtracting the segments.
           # Note angles are represented as cos/sin pairs so we don't
           # have to calculate any trig functions.
-          angs_ = []
-          size_.times do |i_|
-            x0_, y0_, x1_, y1_ = segs_[i_ * 2, 4]
-            angs_ << x0_ * x1_ + y0_ * y1_ << x0_ * y1_ - x1_ * y0_
+          angs = []
+          size.times do |i|
+            x0, y0, x1, y1 = segs[i * 2, 4]
+            angs << x0 * x1 + y0 * y1 << x0 * y1 - x1 * y0
           end
 
           # Now add the angles and count revolutions.
@@ -54,12 +78,12 @@ module RGeo
           direction = nil
           sin = 0.0
           cos = 1.0
-          angs_.each_slice(2) do |(x, y)|
+          angs.each_slice(2) do |(x, y)|
             ready = y > 0.0 && (sin > 0.0 || sin == 0.0 && direction == -1) || y < 0.0 && (sin < 0.0 || sin == 0.0 && direction == 1)
             if y != 0.0
               s = sin * x + cos * y
               c = cos * x - sin * y
-              r = ::Math.sqrt(s * s + c * c)
+              r = Math.sqrt(s * s + c * c)
               sin = s / r
               cos = c / r
             end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple mercator multi point implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class MercatorMultiPointTest < Test::Unit::TestCase # :nodoc:
+class MercatorMultiPointTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::MultiPointTests
 
   def create_factory(opts_ = {})

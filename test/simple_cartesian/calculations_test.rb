@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the internal calculations for simple cartesian
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class CartesianCalculationsTest < Test::Unit::TestCase # :nodoc:
+class CartesianCalculationsTest < Minitest::Test # :nodoc:
   def setup
     @factory = RGeo::Cartesian.simple_factory
     @point1 = @factory.point(3, 4)
@@ -28,11 +30,11 @@ class CartesianCalculationsTest < Test::Unit::TestCase # :nodoc:
     @degenerate_seg = RGeo::Cartesian::Segment.new(@point5, @point5)
   end
 
-  def assert_close_enough(v1_, v2_)
-    diff_ = (v1_ - v2_).abs
-    # denom_ = (v1_ + v2_).abs
-    # diff_ /= denom_ if denom_ > 0.01
-    assert(diff_ < 0.00000001, "#{v1_} is not close to #{v2_}")
+  def assert_close_enough(v1, v2)
+    diff = (v1 - v2).abs
+    # denom = (v1 + v2).abs
+    # diff /= denom if denom > 0.01
+    assert(diff < 0.00000001, "#{v1} is not close to #{v2}")
   end
 
   def test_segment_degenerate

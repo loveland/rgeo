@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Common methods for LineString features
@@ -7,28 +9,22 @@
 module RGeo
   module ImplHelper # :nodoc:
     module BasicLineStringMethods # :nodoc:
-      def initialize(factory_, points_)
-        _set_factory(factory_)
-        @points = points_.map do |elem_|
-          elem_ = Feature.cast(elem_, factory_, Feature::Point)
-          raise Error::InvalidGeometry, "Could not cast #{elem_}" unless elem_
-          elem_
+      def initialize(factory, points)
+        self.factory = factory
+        @points = points.map do |elem|
+          elem = Feature.cast(elem, factory, Feature::Point)
+          raise Error::InvalidGeometry, "Could not cast #{elem}" unless elem
+          elem
         end
-        _validate_geometry
-      end
-
-      def _validate_geometry
-        if @points.size == 1
-          raise Error::InvalidGeometry, "LineString cannot have 1 point"
-        end
+        validate_geometry
       end
 
       def num_points
         @points.size
       end
 
-      def point_n(n_)
-        n_ < 0 ? nil : @points[n_]
+      def point_n(n)
+        n < 0 ? nil : @points[n]
       end
 
       def points
@@ -48,9 +44,9 @@ module RGeo
       end
 
       def boundary
-        array_ = []
-        array_ << @points.first << @points.last if !is_empty? && !is_closed?
-        factory.multi_point([array_])
+        array = []
+        array << @points.first << @points.last if !is_empty? && !is_closed?
+        factory.multipoint([array])
       end
 
       def start_point
@@ -72,9 +68,9 @@ module RGeo
         is_closed? && is_simple?
       end
 
-      def rep_equals?(rhs_)
-        if rhs_.is_a?(self.class) && rhs_.factory.eql?(@factory) && @points.size == rhs_.num_points
-          rhs_.points.each_with_index { |p_, i_| return false unless @points[i_].rep_equals?(p_) }
+      def rep_equals?(rhs)
+        if rhs.is_a?(self.class) && rhs.factory.eql?(@factory) && @points.size == rhs.num_points
+          rhs.points.each_with_index { |p, i| return false unless @points[i].rep_equals?(p) }
         else
           false
         end
@@ -82,39 +78,75 @@ module RGeo
 
       def hash
         @hash ||= begin
-          hash_ = [factory, geometry_type].hash
-          @points.inject(hash_) { |h_, p_| (1_664_525 * h_ + p_.hash).hash }
+          hash = [factory, geometry_type].hash
+          @points.inject(hash) { |h, p| (1_664_525 * h + p.hash).hash }
         end
-      end
-
-      def _copy_state_from(obj_) # :nodoc:
-        super
-        @points = obj_.points
       end
 
       def coordinates
         @points.map(&:coordinates)
       end
+
+      def contains?(rhs)
+        if Feature::Point === rhs
+          contains_point?(rhs)
+        else
+          raise(Error::UnsupportedOperation,
+                "Method LineString#contains? is only defined for Point")
+        end
+      end
+
+      private
+
+      def contains_point?(point)
+        @points.each_cons(2) do |start_point, end_point|
+          return true if point_intersect_segment?(point, start_point, end_point)
+        end
+        false
+      end
+
+      def point_intersect_segment?(point, start_point, end_point)
+        return false unless point_collinear?(point, start_point, end_point)
+
+        if start_point.x != end_point.x
+          between_coordinate?(point.x, start_point.x, end_point.x)
+        else
+          between_coordinate?(point.y, start_point.y, end_point.y)
+        end
+      end
+
+      def point_collinear?(a, b, c)
+        (b.x - a.x) * (c.y - a.y) == (c.x - a.x) * (b.y - a.y)
+      end
+
+      def between_coordinate?(coord, start_coord, end_coord)
+        end_coord >= coord && coord >= start_coord ||
+          start_coord >= coord && coord >= end_coord
+      end
+
+      def copy_state_from(obj)
+        super
+        @points = obj.points
+      end
+
+      def validate_geometry
+        if @points.size == 1
+          raise Error::InvalidGeometry, "LineString cannot have 1 point"
+        end
+      end
     end
 
     module BasicLineMethods # :nodoc:
-      def initialize(factory_, start_, end_)
-        _set_factory(factory_)
-        cstart_ = Feature.cast(start_, factory_, Feature::Point)
-        unless cstart_
-          raise Error::InvalidGeometry, "Could not cast start: #{start_}"
+      def initialize(factory, start, stop)
+        self.factory = factory
+        cstart = Feature.cast(start, factory, Feature::Point)
+        unless cstart
+          raise Error::InvalidGeometry, "Could not cast start: #{start}"
         end
-        cend_ = Feature.cast(end_, factory_, Feature::Point)
-        raise Error::InvalidGeometry, "Could not cast end: #{end_}" unless cend_
-        @points = [cstart_, cend_]
-        _validate_geometry
-      end
-
-      def _validate_geometry # :nodoc:
-        super
-        if @points.size > 2
-          raise Error::InvalidGeometry, "Line must have 0 or 2 points"
-        end
+        cstop = Feature.cast(stop, factory, Feature::Point)
+        raise Error::InvalidGeometry, "Could not cast end: #{stop}" unless cstop
+        @points = [cstart, cstop]
+        validate_geometry
       end
 
       def geometry_type
@@ -124,22 +156,37 @@ module RGeo
       def coordinates
         @points.map(&:coordinates)
       end
+
+      private
+
+      def validate_geometry
+        super
+        if @points.size > 2
+          raise Error::InvalidGeometry, "Line must have 0 or 2 points"
+        end
+      end
     end
 
     module BasicLinearRingMethods # :nodoc:
-      def _validate_geometry # :nodoc:
+      def geometry_type
+        Feature::LinearRing
+      end
+
+      def ccw?
+        RGeo::Cartesian::Analysis.ccw?(self)
+      end
+
+      private
+
+      def validate_geometry
         super
         if @points.size > 0
           @points << @points.first if @points.first != @points.last
-          @points = @points.chunk {|x| x}.map(&:first)
+          @points = @points.chunk { |x| x }.map(&:first)
           if !@factory.property(:uses_lenient_assertions) && !is_ring?
             raise Error::InvalidGeometry, "LinearRing failed ring test"
           end
         end
-      end
-
-      def geometry_type
-        Feature::LinearRing
       end
     end
   end

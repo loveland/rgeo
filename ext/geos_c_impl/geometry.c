@@ -756,7 +756,9 @@ static VALUE method_geometry_buffer_with_style(VALUE self, VALUE distance, VALUE
                                      GEOSBufferWithStyle_r(self_data->geos_context, self_geom,
                                                            rb_num2dbl(distance),
                                                            RGEO_FACTORY_DATA_PTR(factory)->buffer_resolution,
-                                                           endCapStyle, joinStyle, mitreLimit),
+                                                           rb_num2int(endCapStyle),
+                                                           rb_num2int(joinStyle),
+                                                           rb_num2dbl(mitreLimit)),
                                      Qnil);
   }
   return result;
@@ -1043,12 +1045,28 @@ static VALUE method_geometry_invalid_reason(VALUE self)
   self_geom = self_data->geom;
   if (self_geom) {
     str = GEOSisValidReason_r(self_data->geos_context, self_geom);
-    if (str) {
-      result = rb_str_new2(str);
-    }
-    else {
-      result = rb_str_new2("Exception");
-    }
+    // Per documentation, a valid geometry should give an empty string.
+    // However it seems not to be the case. Hence the comparison against
+    // the string that is really given: `"Valid Geometry"`.
+    // See https://github.com/libgeos/geos/issues/431.
+    if (str) result = (str[0] == '\0' || !strcmp(str, "Valid Geometry")) ? Qnil : rb_str_new2(str);
+    else result = rb_str_new2("Exception");
+    GEOSFree_r(self_data->geos_context, str);
+  }
+  return result;
+}
+
+static VALUE method_geometry_point_on_surface(VALUE self)
+{
+  VALUE result;
+  RGeo_GeometryData* self_data;
+  const GEOSGeometry* self_geom;
+
+  result = Qnil;
+  self_data = RGEO_GEOMETRY_DATA_PTR(self);
+  self_geom = self_data->geom;
+  if (self_geom) {
+    result = rgeo_wrap_geos_geometry(self_data->factory, GEOSPointOnSurface_r(self_data->geos_context, self_geom), Qnil);
   }
   return result;
 }
@@ -1063,7 +1081,7 @@ void rgeo_init_geos_geometry(RGeo_Globals* globals)
 
   geos_geometry_methods = rb_define_module_under(globals->geos_module, "CAPIGeometryMethods");
 
-  rb_define_method(geos_geometry_methods, "_set_factory", method_geometry_set_factory, 1);
+  rb_define_method(geos_geometry_methods, "factory=", method_geometry_set_factory, 1);
   rb_define_method(geos_geometry_methods, "initialize_copy", method_geometry_initialize_copy, 1);
   rb_define_method(geos_geometry_methods, "_steal", method_geometry_steal, 1);
   rb_define_method(geos_geometry_methods, "initialized?", method_geometry_initialized_p, 0);
@@ -1107,6 +1125,7 @@ void rgeo_init_geos_geometry(RGeo_Globals* globals)
   rb_define_method(geos_geometry_methods, "sym_difference", method_geometry_sym_difference, 1);
   rb_define_method(geos_geometry_methods, "valid?", method_geometry_is_valid, 0);
   rb_define_method(geos_geometry_methods, "invalid_reason", method_geometry_invalid_reason, 0);
+  rb_define_method(geos_geometry_methods, "point_on_surface", method_geometry_point_on_surface, 0);
 }
 
 

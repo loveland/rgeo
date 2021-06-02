@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the GEOS point implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class GeosZMFactoryTest < Test::Unit::TestCase # :nodoc:
+class GeosZMFactoryTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::FactoryTests
 
   def setup
@@ -36,13 +38,13 @@ class GeosZMFactoryTest < Test::Unit::TestCase # :nodoc:
   end
 
   def test_4d_point
-    point_ = @factory.point(1, 2, 3, 4)
-    assert_equal(RGeo::Feature::Point, point_.geometry_type)
-    assert_equal(3, point_.z)
-    assert_equal(4, point_.m)
-    assert_equal(3, point_.z_geometry.z)
-    assert_nil(point_.z_geometry.m)
-    assert_nil(point_.m_geometry.z)
-    assert_equal(4, point_.m_geometry.m)
+    point = @factory.point(1, 2, 3, 4)
+    assert_equal(RGeo::Feature::Point, point.geometry_type)
+    assert_equal(3, point.z)
+    assert_equal(4, point.m)
+    assert_equal(3, point.z_geometry.z)
+    assert_nil(point.z_geometry.m)
+    assert_nil(point.m_geometry.z)
+    assert_equal(4, point.m_geometry.m)
   end
 end if RGeo::Geos.capi_supported?

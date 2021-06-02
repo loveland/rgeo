@@ -1,6 +1,54 @@
+### 2.3.0 / 2021-04-16
+
+* Fix a memory leak in CAPI's `#invalid_reason`
+* `#invalid_reason` now must return `nil` if polygon is valid.
+* Add #geometries and utilize #each for Enumerable (mylesboone) #248
+
+### 2.2.0 / 2020-11-18
+
+* Add SphericalPolygonMethods#centroid (allknowingfrog) #208
+* Expand gemspec
+* Drop Ruby 2.3 support
+* Add a simple fallback for `Polygon#contains?` (Quiwin) #224
+* Add `ccw?` method for linear rings, with geos support #229
+* Add a simple fallback for `MultiPolygon/LineString#contains?` (Quiwin) #230 #232
+
+### 2.1.1 / 2019-8-26
+
+* Fix BasicPolygonMethods#boundary #206 (ans82)
+* Support hexadecimal string input in Geos #parse_wkb #203 (chrisjwu)
+
+### 2.1.0 / 2019-8-8
+
+* Fix #buffer_with_style style values for Geos (ynelin) #207
+  (fix values of RGeo::Geos::CAP_* and RGeo::Geos::JOIN_* constants)
+* Add geometry point_on_surface method (andrejreznik) #205
+
+### 2.0.1 / 2019-3-7
+
+* Use ProjectedPointImpl in #canonical_point (copiousfreetime) #202
+* Use minitest #201
+
+
+### 2.0.0 / 2018-11-27
+
+Breaking changes
+* Require ruby 2.3+
+* Make undocumented methods private #184
+* Raise InvalidGeometry on parse errors #183
+* Remove MixinCollection module #182
+
+Fixes
+* Fix Cartesian::Analysis.ring_direction (bakineggs) #196
+* Proj4 fixes #187
+* Rename variables ending in `_` (fergyfresh) #181
+* Rubocop style corrections
+
+
 ### 1.1.2 / 2018-10-10
 
 * Fix Cartesian::Analysis.ring_direction (bakineggs) (back-port #196)
+
 
 ### 1.1.1 / 2018-7-6
 

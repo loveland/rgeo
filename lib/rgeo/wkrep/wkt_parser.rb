@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Well-known text parser for RGeo
@@ -51,22 +53,22 @@ module RGeo
       # Create and configure a WKT parser. See the WKTParser
       # documentation for the options that can be passed.
 
-      def initialize(factory_generator_ = nil, opts_ = {})
-        if factory_generator_.is_a?(Feature::Factory::Instance)
-          @factory_generator = Feature::FactoryGenerator.single(factory_generator_)
-          @exact_factory = factory_generator_
-        elsif factory_generator_.respond_to?(:call)
-          @factory_generator = factory_generator_
+      def initialize(factory_generator = nil, opts = {})
+        if factory_generator.is_a?(Feature::Factory::Instance)
+          @factory_generator = Feature::FactoryGenerator.single(factory_generator)
+          @exact_factory = factory_generator
+        elsif factory_generator.respond_to?(:call)
+          @factory_generator = factory_generator
           @exact_factory = nil
         else
           @factory_generator = Cartesian.method(:preferred_factory)
           @exact_factory = nil
         end
-        @support_ewkt = opts_[:support_ewkt] ? true : false
-        @support_wkt12 = opts_[:support_wkt12] ? true : false
-        @strict_wkt11 = @support_ewkt || @support_wkt12 ? false : opts_[:strict_wkt11] ? true : false
-        @ignore_extra_tokens = opts_[:ignore_extra_tokens] ? true : false
-        @default_srid = opts_[:default_srid]
+        @support_ewkt = opts[:support_ewkt] ? true : false
+        @support_wkt12 = opts[:support_wkt12] ? true : false
+        @strict_wkt11 = @support_ewkt || @support_wkt12 ? false : opts[:strict_wkt11] ? true : false
+        @ignore_extra_tokens = opts[:ignore_extra_tokens] ? true : false
+        @default_srid = opts[:default_srid]
       end
 
       # Returns the factory generator. See WKTParser for details.
@@ -100,7 +102,7 @@ module RGeo
         @ignore_extra_tokens
       end
 
-      def _properties # :nodoc:
+      def properties
         {
           "support_ewkt" => @support_ewkt,
           "support_wkt12" => @support_wkt12,
@@ -112,8 +114,8 @@ module RGeo
 
       # Parse the given string, and return a geometry object.
 
-      def parse(str_)
-        str_ = str_.downcase
+      def parse(str)
+        str = str.downcase
         @cur_factory = @exact_factory
         if @cur_factory
           @cur_factory_support_z = @cur_factory.property(:has_z_coordinate) ? true : false
@@ -122,23 +124,25 @@ module RGeo
         @cur_expect_z = nil
         @cur_expect_m = nil
         @cur_srid = @default_srid
-        if @support_ewkt && str_ =~ /^srid=(\d+);/i
-          str_ = $'
+        if @support_ewkt && str =~ /^srid=(\d+);/i
+          str = $'
           @cur_srid = Regexp.last_match(1).to_i
         end
         begin
-          _start_scanner(str_)
-          obj_ = _parse_type_tag(false)
+          start_scanner(str)
+          obj = parse_type_tag
           if @cur_token && !@ignore_extra_tokens
             raise Error::ParseError, "Extra tokens beginning with #{@cur_token.inspect}."
           end
         ensure
-          _clean_scanner
+          clean_scanner
         end
-        obj_
+        obj
       end
 
-      def _check_factory_support # :nodoc:
+      private
+
+      def check_factory_support
         if @cur_expect_z && !@cur_factory_support_z
           raise Error::ParseError, "Geometry calls for Z coordinate but factory doesn't support it."
         end
@@ -147,255 +151,255 @@ module RGeo
         end
       end
 
-      def _ensure_factory # :nodoc:
+      def ensure_factory
         unless @cur_factory
           @cur_factory = @factory_generator.call(srid: @cur_srid, has_z_coordinate: @cur_expect_z, has_m_coordinate: @cur_expect_m)
           @cur_factory_support_z = @cur_factory.property(:has_z_coordinate) ? true : false
           @cur_factory_support_m = @cur_factory.property(:has_m_coordinate) ? true : false
-          _check_factory_support unless @cur_expect_z.nil?
+          check_factory_support unless @cur_expect_z.nil?
         end
         @cur_factory
       end
 
-      def _parse_type_tag(_contained_) # :nodoc:
-        _expect_token_type(::String)
+      def parse_type_tag
+        expect_token_type(String)
         if @support_ewkt && @cur_token =~ /^(.+)(m)$/
-          type_ = Regexp.last_match(1)
-          zm_ = Regexp.last_match(2)
+          type = Regexp.last_match(1)
+          zm = Regexp.last_match(2)
         else
-          type_ = @cur_token
-          zm_ = ""
+          type = @cur_token
+          zm = ""
         end
-        _next_token
-        if zm_.length == 0 && @support_wkt12 && @cur_token.is_a?(::String) && @cur_token =~ /^z?m?$/
-          zm_ = @cur_token
-          _next_token
+        next_token
+        if zm.length == 0 && @support_wkt12 && @cur_token.is_a?(String) && @cur_token =~ /^z?m?$/
+          zm = @cur_token
+          next_token
         end
-        if zm_.length > 0 || @strict_wkt11
-          creating_expectation_ = @cur_expect_z.nil?
-          expect_z_ = zm_[0, 1] == "z" ? true : false
+        if zm.length > 0 || @strict_wkt11
+          creating_expectation = @cur_expect_z.nil?
+          expect_z = zm[0, 1] == "z" ? true : false
           if @cur_expect_z.nil?
-            @cur_expect_z = expect_z_
-          elsif expect_z_ != @cur_expect_z
+            @cur_expect_z = expect_z
+          elsif expect_z != @cur_expect_z
             raise Error::ParseError, "Surrounding collection has Z but contained geometry doesn't."
           end
-          expect_m_ = zm_[-1, 1] == "m" ? true : false
+          expect_m = zm[-1, 1] == "m" ? true : false
           if @cur_expect_m.nil?
-            @cur_expect_m = expect_m_
-          elsif expect_m_ != @cur_expect_m
+            @cur_expect_m = expect_m
+          elsif expect_m != @cur_expect_m
             raise Error::ParseError, "Surrounding collection has M but contained geometry doesn't."
           end
-          if creating_expectation_
+          if creating_expectation
             if @cur_factory
-              _check_factory_support
+              check_factory_support
             else
-              _ensure_factory
+              ensure_factory
             end
           end
         end
-        case type_
+        case type
         when "point"
-          _parse_point(true)
+          parse_point(true)
         when "linestring"
-          _parse_line_string
+          parse_line_string
         when "polygon"
-          _parse_polygon
+          parse_polygon
         when "geometrycollection"
-          _parse_geometry_collection
+          parse_geometry_collection
         when "multipoint"
-          _parse_multi_point
+          parse_multi_point
         when "multilinestring"
-          _parse_multi_line_string
+          parse_multi_line_string
         when "multipolygon"
-          _parse_multi_polygon
+          parse_multi_polygon
         else
-          raise Error::ParseError, "Unknown type tag: #{type_.inspect}."
+          raise Error::ParseError, "Unknown type tag: #{type.inspect}."
         end
       end
 
-      def _parse_coords # :nodoc:
-        _expect_token_type(::Numeric)
-        x_ = @cur_token
-        _next_token
-        _expect_token_type(::Numeric)
-        y_ = @cur_token
-        _next_token
-        extra_ = []
+      def parse_coords
+        expect_token_type(Numeric)
+        x = @cur_token
+        next_token
+        expect_token_type(Numeric)
+        y = @cur_token
+        next_token
+        extra = []
         if @cur_expect_z.nil?
-          while ::Numeric === @cur_token
-            extra_ << @cur_token
-            _next_token
+          while Numeric === @cur_token
+            extra << @cur_token
+            next_token
           end
-          num_extras_ = extra_.size
-          @cur_expect_z = num_extras_ > 0 && (!@cur_factory || @cur_factory_support_z) ? true : false
-          num_extras_ -= 1 if @cur_expect_z
-          @cur_expect_m = num_extras_ > 0 && (!@cur_factory || @cur_factory_support_m) ? true : false
-          num_extras_ -= 1 if @cur_expect_m
-          if num_extras_ > 0
-            raise Error::ParseError, "Found #{extra_.size + 2} coordinates, which is too many for this factory."
+          num_extras = extra.size
+          @cur_expect_z = num_extras > 0 && (!@cur_factory || @cur_factory_support_z) ? true : false
+          num_extras -= 1 if @cur_expect_z
+          @cur_expect_m = num_extras > 0 && (!@cur_factory || @cur_factory_support_m) ? true : false
+          num_extras -= 1 if @cur_expect_m
+          if num_extras > 0
+            raise Error::ParseError, "Found #{extra.size + 2} coordinates, which is too many for this factory."
           end
-          _ensure_factory
+          ensure_factory
         else
-          val_ = 0
+          val = 0
           if @cur_expect_z
-            _expect_token_type(::Numeric)
-            val_ = @cur_token
-            _next_token
+            expect_token_type(Numeric)
+            val = @cur_token
+            next_token
           end
-          extra_ << val_ if @cur_factory_support_z
-          val_ = 0
+          extra << val if @cur_factory_support_z
+          val = 0
           if @cur_expect_m
-            _expect_token_type(::Numeric)
-            val_ = @cur_token
-            _next_token
+            expect_token_type(Numeric)
+            val = @cur_token
+            next_token
           end
-          extra_ << val_ if @cur_factory_support_m
+          extra << val if @cur_factory_support_m
         end
-        @cur_factory.point(x_, y_, *extra_)
+        @cur_factory.point(x, y, *extra)
       end
 
-      def _parse_point(convert_empty_ = false) # :nodoc:
-        if convert_empty_ && @cur_token == "empty"
-          point_ = _ensure_factory.multi_point([])
+      def parse_point(convert_empty = false)
+        if convert_empty && @cur_token == "empty"
+          point = ensure_factory.multi_point([])
         else
-          _expect_token_type(:begin)
-          _next_token
-          point_ = _parse_coords
-          _expect_token_type(:end)
+          expect_token_type(:begin)
+          next_token
+          point = parse_coords
+          expect_token_type(:end)
         end
-        _next_token
-        point_
+        next_token
+        point
       end
 
-      def _parse_line_string # :nodoc:
-        points_ = []
+      def parse_line_string
+        points = []
         if @cur_token != "empty"
-          _expect_token_type(:begin)
-          _next_token
+          expect_token_type(:begin)
+          next_token
           loop do
-            points_ << _parse_coords
+            points << parse_coords
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
+            expect_token_type(:comma)
+            next_token
           end
         end
-        _next_token
-        _ensure_factory.line_string(points_)
+        next_token
+        ensure_factory.line_string(points)
       end
 
-      def _parse_polygon # :nodoc:
-        inner_rings_ = []
+      def parse_polygon
+        inner_rings = []
         if @cur_token == "empty"
-          outer_ring_ = _ensure_factory.linear_ring([])
+          outer_ring = ensure_factory.linear_ring([])
         else
-          _expect_token_type(:begin)
-          _next_token
-          outer_ring_ = _parse_line_string
+          expect_token_type(:begin)
+          next_token
+          outer_ring = parse_line_string
           loop do
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
-            inner_rings_ << _parse_line_string
+            expect_token_type(:comma)
+            next_token
+            inner_rings << parse_line_string
           end
         end
-        _next_token
-        _ensure_factory.polygon(outer_ring_, inner_rings_)
+        next_token
+        ensure_factory.polygon(outer_ring, inner_rings)
       end
 
-      def _parse_geometry_collection # :nodoc:
-        geometries_ = []
+      def parse_geometry_collection
+        geometries = []
         if @cur_token != "empty"
-          _expect_token_type(:begin)
-          _next_token
+          expect_token_type(:begin)
+          next_token
           loop do
-            geometries_ << _parse_type_tag(true)
+            geometries << parse_type_tag
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
+            expect_token_type(:comma)
+            next_token
           end
         end
-        _next_token
-        _ensure_factory.collection(geometries_)
+        next_token
+        ensure_factory.collection(geometries)
       end
 
-      def _parse_multi_point # :nodoc:
-        points_ = []
+      def parse_multi_point
+        points = []
         if @cur_token != "empty"
-          _expect_token_type(:begin)
-          _next_token
+          expect_token_type(:begin)
+          next_token
           loop do
-            uses_paren_ = @cur_token == :begin
-            _next_token if uses_paren_
-            points_ << _parse_coords
-            if uses_paren_
-              _expect_token_type(:end)
-              _next_token
+            uses_paren = @cur_token == :begin
+            next_token if uses_paren
+            points << parse_coords
+            if uses_paren
+              expect_token_type(:end)
+              next_token
             end
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
+            expect_token_type(:comma)
+            next_token
           end
         end
-        _next_token
-        _ensure_factory.multi_point(points_)
+        next_token
+        ensure_factory.multi_point(points)
       end
 
-      def _parse_multi_line_string # :nodoc:
-        line_strings_ = []
+      def parse_multi_line_string
+        line_strings = []
         if @cur_token != "empty"
-          _expect_token_type(:begin)
-          _next_token
+          expect_token_type(:begin)
+          next_token
           loop do
-            line_strings_ << _parse_line_string
+            line_strings << parse_line_string
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
+            expect_token_type(:comma)
+            next_token
           end
         end
-        _next_token
-        _ensure_factory.multi_line_string(line_strings_)
+        next_token
+        ensure_factory.multi_line_string(line_strings)
       end
 
-      def _parse_multi_polygon  # :nodoc:
-        polygons_ = []
+      def parse_multi_polygon
+        polygons = []
         if @cur_token != "empty"
-          _expect_token_type(:begin)
-          _next_token
+          expect_token_type(:begin)
+          next_token
           loop do
-            polygons_ << _parse_polygon
+            polygons << parse_polygon
             break if @cur_token == :end
-            _expect_token_type(:comma)
-            _next_token
+            expect_token_type(:comma)
+            next_token
           end
         end
-        _next_token
-        _ensure_factory.multi_polygon(polygons_)
+        next_token
+        ensure_factory.multi_polygon(polygons)
       end
 
-      def _start_scanner(str_)  # :nodoc:
-        @_scanner = ::StringScanner.new(str_)
-        _next_token
+      def start_scanner(str)
+        @scanner = StringScanner.new(str)
+        next_token
       end
 
-      def _clean_scanner # :nodoc:
-        @_scanner = nil
+      def clean_scanner
+        @scanner = nil
         @cur_token = nil
       end
 
-      def _expect_token_type(type_) # :nodoc:
-        unless type_ === @cur_token
-          raise Error::ParseError, "#{type_.inspect} expected but #{@cur_token.inspect} found."
+      def expect_token_type(type)
+        unless type === @cur_token
+          raise Error::ParseError, "#{type.inspect} expected but #{@cur_token.inspect} found."
         end
       end
 
-      def _next_token # :nodoc:
-        if @_scanner.scan_until(/\(|\)|\[|\]|,|[^\s\(\)\[\],]+/)
-          token_ = @_scanner.matched
-          case token_
+      def next_token
+        if @scanner.scan_until(/\(|\)|\[|\]|,|[^\s\(\)\[\],]+/)
+          token = @scanner.matched
+          case token
           when /^[-+]?(\d+(\.\d*)?|\.\d+)(e[-+]?\d+)?$/
-            @cur_token = token_.to_f
+            @cur_token = token.to_f
           when /^[a-z]+$/
-            @cur_token = token_
+            @cur_token = token
           when ","
             @cur_token = :comma
           when "(", "["
@@ -403,7 +407,7 @@ module RGeo
           when "]", ")"
             @cur_token = :end
           else
-            raise Error::ParseError, "Bad token: #{token_.inspect}"
+            raise Error::ParseError, "Bad token: #{token.inspect}"
           end
         else
           @cur_token = nil

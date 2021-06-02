@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the GEOS multi polygon implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class GeosFFIMultiPolygonTest < Test::Unit::TestCase # :nodoc:
+class GeosFFIMultiPolygonTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::MultiPolygonTests
 
   def create_factories

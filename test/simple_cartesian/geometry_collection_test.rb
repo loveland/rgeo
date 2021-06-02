@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple cartesian geometry collection implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class CartesianGeometryCollectionTest < Test::Unit::TestCase # :nodoc:
+class CartesianGeometryCollectionTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::GeometryCollectionTests
 
   def create_factory

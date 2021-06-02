@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Error classes for RGeo
@@ -9,7 +11,11 @@ module RGeo
 
   module Error
     # Base class for all RGeo-related exceptions
-    class RGeoError < ::RuntimeError
+    class RGeoError < RuntimeError
+    end
+
+    # RGeo error specific to the GEOS implementation.
+    class GeosError < RGeoError
     end
 
     # The specified geometry is invalid

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the GEOS multi line string implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class GeosFFIMultiLineStringTest < Test::Unit::TestCase # :nodoc:
+class GeosFFIMultiLineStringTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::MultiLineStringTests
 
   def create_factory

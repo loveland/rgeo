@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the GEOS line string implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class GeosFFILineStringTest < Test::Unit::TestCase # :nodoc:
+class GeosFFILineStringTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::LineStringTests
 
   def setup

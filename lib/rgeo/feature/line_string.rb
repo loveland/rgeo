@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # LineString feature interface
@@ -45,7 +47,7 @@ module RGeo
       # if the given N is out of range. N is zero-based.
       # Does not support negative indexes.
 
-      def point_n(_n_)
+      def point_n(n)
         raise Error::UnsupportedOperation, "Method LineString#point_n not defined."
       end
 

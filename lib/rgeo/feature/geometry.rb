@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Geometry feature interface
@@ -240,7 +242,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def equals?(_another_geometry_)
+      def equals?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#equals? not defined."
       end
 
@@ -259,7 +261,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def disjoint?(_another_geometry_)
+      def disjoint?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#disjoint? not defined."
       end
 
@@ -278,7 +280,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def intersects?(_another_geometry_)
+      def intersects?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#intersects? not defined."
       end
 
@@ -297,7 +299,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def touches?(_another_geometry_)
+      def touches?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#touches? not defined."
       end
 
@@ -316,7 +318,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def crosses?(_another_geometry_)
+      def crosses?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#crosses? not defined."
       end
 
@@ -335,7 +337,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def within?(_another_geometry_)
+      def within?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#within? not defined."
       end
 
@@ -354,7 +356,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def contains?(_another_geometry_)
+      def contains?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#contains? not defined."
       end
 
@@ -373,7 +375,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def overlaps?(_another_geometry_)
+      def overlaps?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#overlaps? not defined."
       end
 
@@ -399,7 +401,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def relate?(_another_geometry_, _intersection_pattern_matrix_)
+      def relate?(another_geometry, _intersection_pattern_matrix_)
         raise Error::UnsupportedOperation, "Method Geometry#relate not defined."
       end
 
@@ -418,7 +420,7 @@ module RGeo
       # this geometry, strictly speaking, the result of measuring the
       # distance between objects from different factories is undefined.
 
-      def distance(_another_geometry_)
+      def distance(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#distance not defined."
       end
 
@@ -464,7 +466,7 @@ module RGeo
       # this geometry, strictly speaking, the result of performing
       # operations on objects from different factories is undefined.
 
-      def intersection(_another_geometry_)
+      def intersection(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#intersection not defined."
       end
 
@@ -482,7 +484,7 @@ module RGeo
       # this geometry, strictly speaking, the result of performing
       # operations on objects from different factories is undefined.
 
-      def union(_another_geometry_)
+      def union(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#union not defined."
       end
 
@@ -500,7 +502,7 @@ module RGeo
       # this geometry, strictly speaking, the result of performing
       # operations on objects from different factories is undefined.
 
-      def difference(_another_geometry_)
+      def difference(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#difference not defined."
       end
 
@@ -518,7 +520,7 @@ module RGeo
       # this geometry, strictly speaking, the result of performing
       # operations on objects from different factories is undefined.
 
-      def sym_difference(_another_geometry_)
+      def sym_difference(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#sym_difference not defined."
       end
 
@@ -530,7 +532,7 @@ module RGeo
       # this geometry, strictly speaking, the result of comparing objects
       # from different factories is undefined.
 
-      def rep_equals?(_another_geometry_)
+      def rep_equals?(another_geometry)
         raise Error::UnsupportedOperation, "Method Geometry#rep_equals? not defined."
       end
 
@@ -566,12 +568,12 @@ module RGeo
       # representational equivalence test, this method must fall back on
       # objective equivalence.
 
-      def eql?(rhs_)
-        if rhs_.is_a?(RGeo::Feature::Instance)
+      def eql?(rhs)
+        if rhs.is_a?(RGeo::Feature::Instance)
           begin
-            rep_equals?(rhs_)
+            rep_equals?(rhs)
           rescue Error::UnsupportedOperation
-            equal?(rhs_)
+            equal?(rhs)
           end
         else
           false
@@ -592,12 +594,12 @@ module RGeo
       # test, the == operator must fall back on representational or
       # objective equivalence.
 
-      def ==(rhs_)
-        if rhs_.is_a?(RGeo::Feature::Instance)
+      def ==(rhs)
+        if rhs.is_a?(RGeo::Feature::Instance)
           begin
-            equals?(rhs_)
+            equals?(rhs)
           rescue Error::UnsupportedOperation
-            eql?(rhs_)
+            eql?(rhs)
           end
         else
           false
@@ -609,8 +611,8 @@ module RGeo
       # types is not specified; an implementation may choose to provide
       # additional capabilities as appropriate.
 
-      def -(rhs_)
-        difference(rhs_)
+      def -(rhs)
+        difference(rhs)
       end
 
       # If the given rhs is a geometry object, this operator must behave
@@ -618,8 +620,8 @@ module RGeo
       # is not specified; an implementation may choose to provide
       # additional capabilities as appropriate.
 
-      def +(rhs_)
-        union(rhs_)
+      def +(rhs)
+        union(rhs)
       end
 
       # If the given rhs is a geometry object, this operator must behave
@@ -627,8 +629,8 @@ module RGeo
       # types is not specified; an implementation may choose to provide
       # additional capabilities as appropriate.
 
-      def *(rhs_)
-        intersection(rhs_)
+      def *(rhs)
+        intersection(rhs)
       end
     end
   end

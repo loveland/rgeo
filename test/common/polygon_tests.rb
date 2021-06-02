@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Common tests for polygon implementations
@@ -9,204 +11,227 @@ module RGeo
     module Common # :nodoc:
       module PolygonTests # :nodoc:
         def test_creation_simple
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          polygon_ = @factory.polygon(exterior_)
-          assert_not_nil(polygon_)
-          assert(RGeo::Feature::Polygon === polygon_)
-          assert_equal(RGeo::Feature::Polygon, polygon_.geometry_type)
-          assert(exterior_.eql?(polygon_.exterior_ring))
-          assert_equal(0, polygon_.num_interior_rings)
-          assert_nil(polygon_.interior_ring_n(0))
-          assert_nil(polygon_.interior_ring_n(-1))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          polygon = @factory.polygon(exterior)
+          assert(RGeo::Feature::Polygon === polygon)
+          assert_equal(RGeo::Feature::Polygon, polygon.geometry_type)
+          assert(exterior.eql?(polygon.exterior_ring))
+          assert_equal(0, polygon.num_interior_rings)
+          assert_nil(polygon.interior_ring_n(0))
+          assert_nil(polygon.interior_ring_n(-1))
         end
 
         def test_creation_one_hole
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 10)
-          point3_ = @factory.point(10, 10)
-          point4_ = @factory.point(10, 0)
-          point5_ = @factory.point(4, 4)
-          point6_ = @factory.point(5, 6)
-          point7_ = @factory.point(6, 4)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point4_, point1_])
-          interior_ = @factory.linear_ring([point5_, point6_, point7_, point5_])
-          polygon_ = @factory.polygon(exterior_, [interior_])
-          assert_not_nil(polygon_)
-          assert(RGeo::Feature::Polygon === polygon_)
-          assert_equal(RGeo::Feature::Polygon, polygon_.geometry_type)
-          assert(exterior_.eql?(polygon_.exterior_ring))
-          assert_equal(1, polygon_.num_interior_rings)
-          assert(interior_.eql?(polygon_.interior_ring_n(0)))
-          assert_nil(polygon_.interior_ring_n(1))
-          assert_nil(polygon_.interior_ring_n(-1))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          point5 = @factory.point(4, 4)
+          point6 = @factory.point(5, 6)
+          point7 = @factory.point(6, 4)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          interior = @factory.linear_ring([point5, point6, point7, point5])
+          polygon = @factory.polygon(exterior, [interior])
+          assert(RGeo::Feature::Polygon === polygon)
+          assert_equal(RGeo::Feature::Polygon, polygon.geometry_type)
+          assert(exterior.eql?(polygon.exterior_ring))
+          assert_equal(1, polygon.num_interior_rings)
+          assert(interior.eql?(polygon.interior_ring_n(0)))
+          assert_nil(polygon.interior_ring_n(1))
+          assert_nil(polygon.interior_ring_n(-1))
         end
 
         def test_required_equivalences
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior1_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior1_)
-          point4_ = @factory.point(0, 0)
-          point5_ = @factory.point(0, 1)
-          point6_ = @factory.point(1, 0)
-          exterior2_ = @factory.linear_ring([point4_, point5_, point6_, point4_])
-          poly2_ = @factory.polygon(exterior2_)
-          assert(poly1_.eql?(poly2_))
-          assert(poly1_ == poly2_)
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior1 = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior1)
+          point4 = @factory.point(0, 0)
+          point5 = @factory.point(0, 1)
+          point6 = @factory.point(1, 0)
+          exterior2 = @factory.linear_ring([point4, point5, point6, point4])
+          poly2 = @factory.polygon(exterior2)
+          assert(poly1.eql?(poly2))
+          assert(poly1 == poly2)
         end
 
         def test_fully_equal
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior1_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior1_)
-          point4_ = @factory.point(0, 0)
-          point5_ = @factory.point(0, 1)
-          point6_ = @factory.point(1, 0)
-          exterior2_ = @factory.linear_ring([point4_, point5_, point6_, point4_])
-          poly2_ = @factory.polygon(exterior2_)
-          assert(poly1_.rep_equals?(poly2_))
-          assert(poly1_.equals?(poly2_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior1 = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior1)
+          point4 = @factory.point(0, 0)
+          point5 = @factory.point(0, 1)
+          point6 = @factory.point(1, 0)
+          exterior2 = @factory.linear_ring([point4, point5, point6, point4])
+          poly2 = @factory.polygon(exterior2)
+          assert(poly1.rep_equals?(poly2))
+          assert(poly1.equals?(poly2))
         end
 
         def test_geometrically_equal_but_ordered_different
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior1_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior1_)
-          exterior2_ = @factory.linear_ring([point2_, point3_, point1_, point2_])
-          poly2_ = @factory.polygon(exterior2_)
-          assert(!poly1_.rep_equals?(poly2_))
-          assert(poly1_.equals?(poly2_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior1 = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior1)
+          exterior2 = @factory.linear_ring([point2, point3, point1, point2])
+          poly2 = @factory.polygon(exterior2)
+          assert(!poly1.rep_equals?(poly2))
+          assert(poly1.equals?(poly2))
         end
 
         def test_geometrically_equal_but_different_directions
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior1_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior1_)
-          exterior2_ = @factory.linear_ring([point1_, point3_, point2_, point1_])
-          poly2_ = @factory.polygon(exterior2_)
-          assert(!poly1_.rep_equals?(poly2_))
-          assert(poly1_.equals?(poly2_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior1 = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior1)
+          exterior2 = @factory.linear_ring([point1, point3, point2, point1])
+          poly2 = @factory.polygon(exterior2)
+          assert(!poly1.rep_equals?(poly2))
+          assert(poly1.equals?(poly2))
         end
 
         def test_hashes_equal_for_representationally_equivalent_objects
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior1_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior1_)
-          point4_ = @factory.point(0, 0)
-          point5_ = @factory.point(0, 1)
-          point6_ = @factory.point(1, 0)
-          exterior2_ = @factory.linear_ring([point4_, point5_, point6_, point4_])
-          poly2_ = @factory.polygon(exterior2_)
-          assert_equal(poly1_.hash, poly2_.hash)
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior1 = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior1)
+          point4 = @factory.point(0, 0)
+          point5 = @factory.point(0, 1)
+          point6 = @factory.point(1, 0)
+          exterior2 = @factory.linear_ring([point4, point5, point6, point4])
+          poly2 = @factory.polygon(exterior2)
+          assert_equal(poly1.hash, poly2.hash)
         end
 
         def test_wkt_creation_simple
-          parsed_poly_ = @factory.parse_wkt("POLYGON((0 0, 0 1, 1 0, 0 0))")
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          built_poly_ = @factory.polygon(exterior_)
-          assert(built_poly_.eql?(parsed_poly_))
+          parsed_poly = @factory.parse_wkt("POLYGON((0 0, 0 1, 1 0, 0 0))")
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          built_poly = @factory.polygon(exterior)
+          assert(built_poly.eql?(parsed_poly))
         end
 
         def test_wkt_creation_one_hole
-          parsed_poly_ = @factory.parse_wkt("POLYGON((0 0, 0 10, 10 10, 10 0, 0 0), (4 4, 5 6, 6 4, 4 4))")
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 10)
-          point3_ = @factory.point(10, 10)
-          point4_ = @factory.point(10, 0)
-          point5_ = @factory.point(4, 4)
-          point6_ = @factory.point(5, 6)
-          point7_ = @factory.point(6, 4)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point4_, point1_])
-          interior_ = @factory.linear_ring([point5_, point6_, point7_, point5_])
-          built_poly_ = @factory.polygon(exterior_, [interior_])
-          assert(built_poly_.eql?(parsed_poly_))
+          parsed_poly = @factory.parse_wkt("POLYGON((0 0, 0 10, 10 10, 10 0, 0 0), (4 4, 5 6, 6 4, 4 4))")
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          point5 = @factory.point(4, 4)
+          point6 = @factory.point(5, 6)
+          point7 = @factory.point(6, 4)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          interior = @factory.linear_ring([point5, point6, point7, point5])
+          built_poly = @factory.polygon(exterior, [interior])
+          assert(built_poly.eql?(parsed_poly))
         end
 
         def test_clone
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior_)
-          poly2_ = poly1_.clone
-          assert(poly1_.eql?(poly2_))
-          assert(exterior_.eql?(poly2_.exterior_ring))
-          assert_equal(0, poly2_.num_interior_rings)
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior)
+          poly2 = poly1.clone
+          assert(poly1.eql?(poly2))
+          assert(exterior.eql?(poly2.exterior_ring))
+          assert_equal(0, poly2.num_interior_rings)
         end
 
         def test_type_check
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly_ = @factory.polygon(exterior_)
-          assert(RGeo::Feature::Geometry.check_type(poly_))
-          assert(!RGeo::Feature::Point.check_type(poly_))
-          assert(!RGeo::Feature::GeometryCollection.check_type(poly_))
-          assert(RGeo::Feature::Surface.check_type(poly_))
-          assert(RGeo::Feature::Polygon.check_type(poly_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          poly = @factory.polygon(exterior)
+          assert(RGeo::Feature::Geometry.check_type(poly))
+          assert(!RGeo::Feature::Point.check_type(poly))
+          assert(!RGeo::Feature::GeometryCollection.check_type(poly))
+          assert(RGeo::Feature::Surface.check_type(poly))
+          assert(RGeo::Feature::Polygon.check_type(poly))
         end
 
         def test_as_text_wkt_round_trip
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior_)
-          text_ = poly1_.as_text
-          poly2_ = @factory.parse_wkt(text_)
-          assert(poly1_.eql?(poly2_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior)
+          text = poly1.as_text
+          poly2 = @factory.parse_wkt(text)
+          assert(poly1.eql?(poly2))
         end
 
         def test_as_binary_wkb_round_trip
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior_)
-          binary_ = poly1_.as_binary
-          poly2_ = @factory.parse_wkb(binary_)
-          assert(poly1_.eql?(poly2_))
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior)
+          binary = poly1.as_binary
+          poly2 = @factory.parse_wkb(binary)
+          assert(poly1.eql?(poly2))
         end
 
         def test_dimension
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 10)
-          point3_ = @factory.point(10, 10)
-          point4_ = @factory.point(10, 0)
-          point5_ = @factory.point(4, 4)
-          point6_ = @factory.point(5, 6)
-          point7_ = @factory.point(6, 4)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point4_, point1_])
-          interior_ = @factory.linear_ring([point5_, point6_, point7_, point5_])
-          poly_ = @factory.polygon(exterior_, [interior_])
-          assert_equal(2, poly_.dimension)
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          point5 = @factory.point(4, 4)
+          point6 = @factory.point(5, 6)
+          point7 = @factory.point(6, 4)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          interior = @factory.linear_ring([point5, point6, point7, point5])
+          poly = @factory.polygon(exterior, [interior])
+          assert_equal(2, poly.dimension)
         end
 
         def test_is_empty
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 1)
-          point3_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point1_])
-          poly1_ = @factory.polygon(exterior_)
-          assert(!poly1_.is_empty?)
-          poly2_ = @factory.polygon(@factory.linear_ring([]))
-          assert(poly2_.is_empty?)
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          poly1 = @factory.polygon(exterior)
+          assert(!poly1.is_empty?)
+          poly2 = @factory.polygon(@factory.linear_ring([]))
+          assert(poly2.is_empty?)
+        end
+
+        def test_boundary_simple
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 1)
+          point3 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point1])
+          boundary =  @factory.multi_line_string([exterior])
+          polygon = @factory.polygon(exterior)
+          assert_equal(boundary, polygon.boundary)
+        end
+
+        def test_boundary_one_hole
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          point5 = @factory.point(4, 4)
+          point6 = @factory.point(5, 6)
+          point7 = @factory.point(6, 4)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          interior = @factory.linear_ring([point5, point6, point7, point5])
+          boundary =  @factory.multi_line_string([exterior, interior])
+          polygon = @factory.polygon(exterior, [interior])
+          assert_equal(boundary, polygon.boundary)
         end
 
         def test_polygon_coordinates
@@ -222,30 +247,30 @@ module RGeo
         end
 
         def test_ignores_consecutive_repeated_points
-          point1_ = @factory.point(0, 0)
-          point2_ = @factory.point(0, 0)
-          point3_ = @factory.point(0, 1)
-          point4_ = @factory.point(0, 1)
-          point5_ = @factory.point(0, 1)
-          point6_ = @factory.point(1, 0)
-          point7_ = @factory.point(1, 0)
-          point8_ = @factory.point(1, 0)
-          exterior_ = @factory.linear_ring([point1_, point2_, point3_, point4_, point5_, point6_, point7_, point8_])
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 0)
+          point3 = @factory.point(0, 1)
+          point4 = @factory.point(0, 1)
+          point5 = @factory.point(0, 1)
+          point6 = @factory.point(1, 0)
+          point7 = @factory.point(1, 0)
+          point8 = @factory.point(1, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point5, point6, point7, point8])
 
-          poly1_ = @factory.polygon(exterior_)
-          assert(!poly1_.nil?)
+          poly1 = @factory.polygon(exterior)
+          assert(!poly1.nil?)
 
-          line_string = poly1_.exterior_ring
+          line_string = poly1.exterior_ring
 
-            case line_string.class.name
-            when "GeosPolygonTest"
-            when "RGeo::Geos::FFILinearRingImpl"
-            when "RGeo::Geos::CAPILinearRingImpl"
-            when "GeosFFIPolygonTest"
-              assert(line_string.points.count == 9)
-            else
-              assert(line_string.num_points == 4)
-            end
+          case line_string.class.name
+          when "GeosPolygonTest"
+          when "RGeo::Geos::FFILinearRingImpl"
+          when "RGeo::Geos::CAPILinearRingImpl"
+          when "GeosFFIPolygonTest"
+            assert(line_string.points.count == 9)
+          else
+            assert(line_string.num_points == 4)
+          end
 
           points = line_string.points
           assert(points.first.x == points.last.x)
@@ -253,6 +278,59 @@ module RGeo
           assert(points.first.z == points.last.z)
         end
 
+        def test_point_on_surface
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          polygon = @factory.polygon(exterior)
+          assert_equal(polygon.point_on_surface, @factory.point(5.0, 5.0))
+        end
+
+        def test_contains_point
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 5)
+          point3 = @factory.point(5, 5)
+          point4 = @factory.point(5, 0)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          polygon = @factory.polygon(exterior)
+
+          assert_equal(true, polygon.contains?(@factory.point(2.5, 2.5)))
+          assert_equal(false, polygon.contains?(@factory.point(6, 6)))
+          assert_equal(false, polygon.contains?(@factory.point(0, 2.5)))
+          assert_equal(false, polygon.contains?(@factory.point(2.5, 0)))
+          assert_equal(false, polygon.contains?(point1))
+          assert_equal(false, polygon.contains?(point2))
+          assert_equal(false, polygon.contains?(point3))
+          assert_equal(false, polygon.contains?(point4))
+        end
+
+        def test_contains_triangle
+          point1 = @factory.point(4, 4)
+          point2 = @factory.point(5, 6)
+          point3 = @factory.point(6, 4)
+          line_string = @factory.line_string([point1, point2, point3, point1])
+          polygon = @factory.polygon(line_string)
+          assert_equal(true, polygon.contains?(@factory.point(5, 5)))
+        end
+
+        def test_contains_point_one_hole
+          point1 = @factory.point(0, 0)
+          point2 = @factory.point(0, 10)
+          point3 = @factory.point(10, 10)
+          point4 = @factory.point(10, 0)
+          point5 = @factory.point(4, 4)
+          point6 = @factory.point(5, 6)
+          point7 = @factory.point(6, 4)
+          exterior = @factory.linear_ring([point1, point2, point3, point4, point1])
+          interior = @factory.linear_ring([point5, point6, point7, point5])
+          polygon = @factory.polygon(exterior, [interior])
+
+          assert_equal(true, polygon.contains?(@factory.point(2, 3)))
+          assert_equal(false, polygon.contains?(@factory.point(5, 5)))
+          assert_equal(false, polygon.contains?(@factory.point(4, 4)))
+        end
       end
     end
   end

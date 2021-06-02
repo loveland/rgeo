@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple cartesian polygon implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class CartesianPolygonTest < Test::Unit::TestCase # :nodoc:
+class CartesianPolygonTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::PolygonTests
 
   def setup
@@ -16,4 +18,5 @@ class CartesianPolygonTest < Test::Unit::TestCase # :nodoc:
   undef_method :test_fully_equal
   undef_method :test_geometrically_equal_but_ordered_different
   undef_method :test_geometrically_equal_but_different_directions
+  undef_method :test_point_on_surface
 end

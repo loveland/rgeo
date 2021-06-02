@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple spherical multi polygon implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class SphericalMultiPolygonTest < Test::Unit::TestCase # :nodoc:
+class SphericalMultiPolygonTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::MultiPolygonTests
 
   def create_factories
@@ -19,4 +21,5 @@ class SphericalMultiPolygonTest < Test::Unit::TestCase # :nodoc:
   undef_method :test_creation_connected
   undef_method :test_equal
   undef_method :test_not_equal
+  undef_method :test_point_on_surface
 end

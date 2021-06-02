@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple spherical point implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class SphericalPointTest < Test::Unit::TestCase # :nodoc:
+class SphericalPointTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::PointTests
 
   def setup
@@ -17,42 +19,42 @@ class SphericalPointTest < Test::Unit::TestCase # :nodoc:
   end
 
   def test_latlon
-    point_ = @factory.point(21, -22)
-    assert_equal(21, point_.longitude)
-    assert_equal(-22, point_.latitude)
+    point = @factory.point(21, -22)
+    assert_equal(21, point.longitude)
+    assert_equal(-22, point.latitude)
   end
 
   def test_antimeridian_positive
-    point_ = @factory.point(180, 85)
-    assert_equal(180, point_.longitude)
-    assert_equal(85, point_.latitude)
+    point = @factory.point(180, 85)
+    assert_equal(180, point.longitude)
+    assert_equal(85, point.latitude)
   end
 
   def test_antimeridian_netagive
-    point_ = @factory.point(-180, -85)
-    assert_equal(-180, point_.longitude)
-    assert_equal(-85, point_.latitude)
+    point = @factory.point(-180, -85)
+    assert_equal(-180, point.longitude)
+    assert_equal(-85, point.latitude)
   end
 
   def test_srid
-    point_ = @factory.point(11, 12)
-    assert_equal(4055, point_.srid)
+    point = @factory.point(11, 12)
+    assert_equal(4055, point.srid)
   end
 
   def test_distance
-    point1_ = @factory.point(0, 10)
-    point2_ = @factory.point(0, 10)
-    point3_ = @factory.point(0, 40)
-    assert_in_delta(0, point1_.distance(point2_), 0.0001)
-    assert_in_delta(::Math::PI / 6.0 * RGeo::Geographic::SphericalMath::RADIUS, point1_.distance(point3_), 0.0001)
+    point1 = @factory.point(0, 10)
+    point2 = @factory.point(0, 10)
+    point3 = @factory.point(0, 40)
+    assert_in_delta(0, point1.distance(point2), 0.0001)
+    assert_in_delta(Math::PI / 6.0 * RGeo::Geographic::SphericalMath::RADIUS, point1.distance(point3), 0.0001)
   end
 
   def test_floating_point_perturbation
     # A naive way of wrapping longitudes to [-180,180] might cause
     # perturbation due to floating point errors. Make sure this
     # doesn't happen.
-    point_ = @factory.point(-98.747534, 38.057583)
-    assert_equal(-98.747534, point_.x)
+    point = @factory.point(-98.747534, 38.057583)
+    assert_equal(-98.747534, point.x)
   end
 
   undef_method :test_disjoint
@@ -66,4 +68,5 @@ class SphericalPointTest < Test::Unit::TestCase # :nodoc:
   undef_method :test_union
   undef_method :test_difference
   undef_method :test_sym_difference
+  undef_method :test_point_on_surface
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -----------------------------------------------------------------------------
 #
 # Tests for the simple spherical multi line string implementation
@@ -6,7 +8,7 @@
 
 require "test_helper"
 
-class SphericalMultiLineStringTest < Test::Unit::TestCase # :nodoc:
+class SphericalMultiLineStringTest < Minitest::Test # :nodoc:
   include RGeo::Tests::Common::MultiLineStringTests
 
   def create_factory
@@ -17,4 +19,5 @@ class SphericalMultiLineStringTest < Test::Unit::TestCase # :nodoc:
   undef_method :test_geometrically_equal
   undef_method :test_not_equal
   undef_method :test_length
+  undef_method :test_point_on_surface
 end
